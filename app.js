@@ -412,7 +412,12 @@ function receivedPostback(event) {
 
 	// When a postback is called, we'll send a message back to the sender to 
 	// let them know it was successful
-	sendTextMessage(senderID, "Postback called");
+	if ( payload == 'getStarted' ) {
+		sendButtonMessage(senderID);
+	} else {
+		sendTextMessage(senderID, "Postback called");
+	}
+
 }
 
 /*
