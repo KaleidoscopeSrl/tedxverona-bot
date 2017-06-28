@@ -210,10 +210,38 @@ function createGreetingApi(data) {
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			console.log("Greeting set successfully!");
+			createGetStarted();
 		} else {
 			console.error("Failed calling Thread Reference API", response.statusCode,     response.statusMessage, body.error);
 		}
 	});  
+}
+
+function callThreadSettingsAPI(data) {
+	request({
+		uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
+		qs: { access_token: PAGE_ACCESS_TOKEN },
+		method: 'POST',
+		json: data
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log("Thread Settings successfully changed!");
+		} else {
+			console.error("Failed calling Thread Reference API", response.statusCode, response.statusMessage, body.error);
+		}
+	});
+}
+
+function createGetStarted() {
+	var data = {
+		setting_type: "call_to_actions",
+		thread_state: "new_thread",
+		call_to_actions:[ {
+			payload:"getStarted"
+		}
+		]
+	};
+	callThreadSettingsAPI(data);
 }
 
 function setGreetingText() {
@@ -221,20 +249,12 @@ function setGreetingText() {
 		setting_type: "greeting",
 		greeting: {
 			text: "Ciao {{ user_first_name }}! Benvenuto nel Bot di TEDxVerona! Quest'anno il tema è Time To Rock! Usa i bottoni qui sotto per accedere alle info necessarie.!",
-			buttons:[{
-				type: "web_url",
-				url: "https://www.oculus.com/en-us/rift/",
-				title: "Open Web URL"
-			}, {
-				type: "postback",
-				title: "Trigger Postback",
-				payload: "DEVELOPER_DEFINED_PAYLOAD"
-			}]
 		}
 	};
 
 	createGreetingApi(greetingData);
 }
+
 
 /*
  * Message Event
