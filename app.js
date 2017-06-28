@@ -237,9 +237,8 @@ function createGetStarted() {
 		setting_type: "call_to_actions",
 		thread_state: "new_thread",
 		call_to_actions:[ {
-			payload:"getStarted"
-		}
-		]
+			payload: "getStarted"
+		}]
 	};
 	callThreadSettingsAPI(data);
 }
@@ -248,7 +247,7 @@ function setGreetingText() {
 	var greetingData = {
 		setting_type: "greeting",
 		greeting: {
-			text: "Ciao {{ user_first_name }}! Benvenuto nel Bot di TEDxVerona! Quest'anno il tema è Time To Rock! Usa i bottoni qui sotto per accedere alle info necessarie.!",
+			text: "Ciao {{ user_first_name }}! AA Benvenuto nel Bot di TEDxVerona! Quest'anno il tema è Time To Rock! Usa i bottoni qui sotto per accedere alle info necessarie.!",
 		}
 	};
 
