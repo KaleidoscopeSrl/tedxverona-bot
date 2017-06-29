@@ -1,19 +1,14 @@
-/*
- * Copyright 2016-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-/* jshint node: true, devel: true */
 'use strict';
+
+var auth = require('./auth');
+var startThread = require('./start_thread');
+var BotConfig = require('./bot_config');
+
+const crypto = require('crypto');
+
 
 const 
 	bodyParser = require('body-parser'),
-	config = require('config'),
-	crypto = require('crypto'),
 	express = require('express'),
 	https = require('https'),  
 	request = require('request');
@@ -24,37 +19,17 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.json({ verify: verifyRequestSignature }));
 app.use(express.static('public'));
 
-/*
- * Be sure to setup your config values before running this code. You can 
- * set them using environment variables or modifying the config file in /config.
- *
- */
 
-// App Secret can be retrieved from the App Dashboard
-const APP_SECRET = (process.env.MESSENGER_APP_SECRET) ? 
-	process.env.MESSENGER_APP_SECRET :
-	config.get('appSecret');
+const APP_SECRET = BotConfig.app_secret;
+const VALIDATION_TOKEN = BotConfig.validation_token;
+const PAGE_ACCESS_TOKEN = BotConfig.page_access_token;
+const SERVER_URL = BotConfig.server_url;
 
-// Arbitrary value used to validate a webhook
-const VALIDATION_TOKEN = (process.env.MESSENGER_VALIDATION_TOKEN) ?
-	(process.env.MESSENGER_VALIDATION_TOKEN) :
-	config.get('validationToken');
-
-// Generate a page access token for your page from the App Dashboard
-const PAGE_ACCESS_TOKEN = (process.env.MESSENGER_PAGE_ACCESS_TOKEN) ?
-	(process.env.MESSENGER_PAGE_ACCESS_TOKEN) :
-	config.get('pageAccessToken');
-
-// URL where the app is running (include protocol). Used to point to scripts and 
-// assets located at this address. 
-const SERVER_URL = (process.env.SERVER_URL) ?
-	(process.env.SERVER_URL) :
-	config.get('serverURL');
-
-if (!(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL)) {
+if ( !(APP_SECRET && VALIDATION_TOKEN && PAGE_ACCESS_TOKEN && SERVER_URL) ) {
 	console.error("Missing config values");
 	process.exit(1);
 }
+
 
 /*
  * Use your own validation token. Check that the token used in the Webhook 
@@ -82,6 +57,8 @@ app.get('/webhook', function(req, res) {
  */
 app.post('/webhook', function (req, res) {
 	var data = req.body;
+
+console.log(data);
 
 	// Make sure this is a page subscription
 	if (data.object == 'page') {
@@ -119,37 +96,7 @@ app.post('/webhook', function (req, res) {
 	}
 });
 
-/*
- * This path is used for account linking. The account linking call-to-action
- * (sendAccountLinking) is pointed to this URL. 
- * 
- */
-app.get('/authorize', function(req, res) {
-	var accountLinkingToken = req.query.account_linking_token;
-	var redirectURI = req.query.redirect_uri;
 
-	// Authorization Code should be generated per user by the developer. This will 
-	// be passed to the Account Linking callback.
-	var authCode = "1234567890";
-
-	// Redirect users to this URI on successful login
-	var redirectURISuccess = redirectURI + "&authorization_code=" + authCode;
-
-	res.render('authorize', {
-		accountLinkingToken: accountLinkingToken,
-		redirectURI: redirectURI,
-		redirectURISuccess: redirectURISuccess
-	});
-});
-
-/*
- * Verify that the callback came from Facebook. Using the App Secret from 
- * the App Dashboard, we can verify the signature that is sent with each 
- * callback in the x-hub-signature field, located in the header.
- *
- * https://developers.facebook.com/docs/graph-api/webhooks#setup
- *
- */
 function verifyRequestSignature(req, res, buf) {
 	var signature = req.headers["x-hub-signature"];
 
@@ -170,16 +117,16 @@ function verifyRequestSignature(req, res, buf) {
 			throw new Error("Couldn't validate the request signature.");
 		}
 	}
-}
+};
 
 /*
- * Authorization Event
- *
- * The value for 'optin.ref' is defined in the entry point. For the "Send to 
- * Messenger" plugin, it is the 'data-ref' field. Read more at 
- * https://developers.facebook.com/docs/messenger-platform/webhook-reference/authentication
- *
- */
+* Authorization Event
+*
+* The value for 'optin.ref' is defined in the entry point. For the "Send to 
+* Messenger" plugin, it is the 'data-ref' field. Read more at 
+* https://developers.facebook.com/docs/messenger-platform/webhook-reference/authentication
+*
+*/
 function receivedAuthentication(event) {
 	var senderID = event.sender.id;
 	var recipientID = event.recipient.id;
@@ -198,61 +145,8 @@ function receivedAuthentication(event) {
 	// When an authentication is received, we'll send a message back to the sender
 	// to let them know it was successful.
 	sendTextMessage(senderID, "Authentication successful");
-}
+};
 
-
-function createGreetingApi(data) {
-	request({
-		uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
-		qs: { access_token: PAGE_ACCESS_TOKEN },
-		method: 'POST',
-		json: data
-	}, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			console.log("Greeting set successfully!");
-			createGetStarted();
-		} else {
-			console.error("Failed calling Thread Reference API", response.statusCode,     response.statusMessage, body.error);
-		}
-	});  
-}
-
-function callThreadSettingsAPI(data) {
-	request({
-		uri: 'https://graph.facebook.com/v2.6/me/thread_settings',
-		qs: { access_token: PAGE_ACCESS_TOKEN },
-		method: 'POST',
-		json: data
-	}, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-			console.log("Thread Settings successfully changed!");
-		} else {
-			console.error("Failed calling Thread Reference API", response.statusCode, response.statusMessage, body.error);
-		}
-	});
-}
-
-function createGetStarted() {
-	var data = {
-		setting_type: "call_to_actions",
-		thread_state: "new_thread",
-		call_to_actions:[ {
-			payload: "getStarted"
-		}]
-	};
-	callThreadSettingsAPI(data);
-}
-
-function setGreetingText() {
-	var greetingData = {
-		setting_type: "greeting",
-		greeting: {
-			text: "Ciao {{ user_first_name }}! AA Benvenuto nel Bot di TEDxVerona! Quest'anno il tema è Time To Rock! Usa i bottoni qui sotto per accedere alle info necessarie.!",
-		}
-	};
-
-	createGreetingApi(greetingData);
-}
 
 
 /*
@@ -419,6 +313,61 @@ function receivedPostback(event) {
 	}
 
 }
+
+/*
+ * Send a button message using the Send API.
+ *
+ */
+function sendInitialMenu(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			attachment: {
+				type: "template",
+				payload: {
+					template_type: "button",
+					text: "Seleziona una delle voci qui sotto per accedere ai contenuti di TEDxVerona 2017",
+					buttons:[{
+						type: "postback",
+						title: "Time To Rock! \m/ (>.<) \m/",
+						payload: "show_time_to_rock_theme"
+					}, {
+						type: "web_url",
+						url: "https://www.eventbrite.it/e/biglietti-tedxverona-2017-78-ottobre-time-to-rock-34884173502#tickets",
+						title: "Acquista il biglietto"
+					}, {
+						type: "postback",
+						title: "Speakers",
+						payload: "show_2017_speakers"
+					}, {
+						type: "postback",
+						title: "Partners",
+						payload: "show_2017_partners"
+					}, {
+						type: "postback",
+						title: "Team",
+						payload: "show_2017_team"
+					} ]
+				}
+			}
+		}
+	};
+
+	callSendAPI(messageData);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * Message Read Event
@@ -883,7 +832,33 @@ function callSendAPI(messageData) {
 // certificate authority.
 app.listen(app.get('port'), function() {
 	console.log('Node app is running on port', app.get('port'));
-	setGreetingText();
+	console.log('BOT: start conversation');
+	startThread.start();
+});
+
+
+/*
+* This path is used for account linking. The account linking call-to-action
+* (sendAccountLinking) is pointed to this URL. 
+* 
+*/
+app.get('/authorize', function(req, res) {
+	var accountLinkingToken = req.query.account_linking_token;
+	var redirectURI = req.query.redirect_uri;
+
+	// Authorization Code should be generated per user by the developer. This will 
+	// be passed to the Account Linking callback.
+	var authCode = "1234567890";
+
+	// Redirect users to this URI on successful login
+	var redirectURISuccess = redirectURI + "&authorization_code=" + authCode;
+
+	res.render('authorize', {
+		accountLinkingToken: accountLinkingToken,
+		redirectURI: redirectURI,
+		redirectURISuccess: redirectURISuccess
+	});
 });
 
 module.exports = app;
+
