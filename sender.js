@@ -76,7 +76,8 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					}, {
 						title: "Biglietti",
 						item_url: "https://www.eventbrite.it/e/biglietti-tedxverona-2017-78-ottobre-time-to-rock-34884173502#tickets",               
-						image_url: 'https://petersfancybrownhats.com/company_image.png',
+						//image_url: this.server_url + "/assets/tickets.jpg",
+						image_url: 'https://www.kaleidoscope.it/assets/img/projects/movimentore/movimentore-cover-xs.jpg',
 						buttons: [{
 							type: "web_url",
 							url: "https://www.eventbrite.it/e/biglietti-tedxverona-2017-78-ottobre-time-to-rock-34884173502#tickets",
