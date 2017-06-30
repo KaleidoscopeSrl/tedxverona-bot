@@ -5,14 +5,34 @@ function Sender(page_access_token, server_url) {
 	this.server_url = server_url;
 }
 
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 
 /*
  * Call the Send API. The message data goes in the body. If successful, we'll 
  * get the message id in a response 
  *
  */
-Sender.prototype.callSendAPI = function(messageData)
+Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess = '')
 {
+	var self = this;
+
 	request({
 		uri: 'https://graph.facebook.com/v2.6/me/messages',
 		qs: { access_token: this.page_access_token },
@@ -25,6 +45,17 @@ Sender.prototype.callSendAPI = function(messageData)
 
 			if (messageId) {
 				console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
+			
+				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_speakers' ) {
+					self.sendSeeAllSpeakers( recipientId );
+				}
+				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_partners' ) {
+					self.sendSeeAllPartners( recipientId );
+				}
+				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_team' ) {
+					self.sendSeeAllTeam( recipientId );
+				}
+
 			} else {
 				console.log("Successfully called Send API for recipient %s", recipientId);
 			}
@@ -53,7 +84,7 @@ Sender.prototype.sendTextMessage = function(recipientId, messageText)
 
 Sender.prototype.sendInitialMenu = function(recipientId)
 {
-	this.sendTextMessage(recipientId, "Seleziona una delle voci qui sotto per accedere ai contenuti di TEDxVerona 2017");
+	this.sendTextMessage(recipientId, "Seleziona una delle voci qui sotto per accedere ai contenuti di TEDxVerona 2017!");
 
 	var messageData = {
 		recipient: {
@@ -123,6 +154,236 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 	this.callSendAPI(messageData);
 };
 
+Sender.prototype.sendTimeToRockTheme = function(recipientId)
+{
+	var theme = "Il tema per TEDxVerona 2017 è TIME TO ROCK." + "\n\n"
+			  + "è tempo di.." + "\n"
+			  + "..rimboccarsi le maniche." + "\n"
+			  + "..raccontare esperienze che ispirino un cambiamento positivo." + "\n"
+			  + "..liberare energia." + "\n"
+			  + "..uscire dagli schemi, spaziando tra ampie armonie fino a progressioni dissonanti." + "\n\n"
+			  + "Il rock come un’esplosione, un nuovo risveglio." + "\n"
+			  + "Alziamo il volume delle idee. Stay tuned!" + "\n\n"
+			  + "It’s TIME TO ROCK!" + "\n"
+			  + "TEDxVerona 2017,  7-8 Ottobre 2017";
+
+	this.sendTextMessage(recipientId, theme);
+}
+
+Sender.prototype.sendSeeAllSpeakers = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			attachment: {
+				type: "template",
+				payload: {
+					template_type: "button",
+					text: "Scopri tutti gli speakers!",
+					buttons:[{
+						type: "web_url",
+						url: "http://www.tedxverona.com/speakers/",
+						title: "Vai al sito"
+					}]
+				}
+			}
+		}
+	};
+	this.callSendAPI(messageData);
+};
+
+Sender.prototype.sendSeeAllPartners = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			attachment: {
+				type: "template",
+				payload: {
+					template_type: "button",
+					text: "Scopri tutti i partners!",
+					buttons:[{
+						type: "web_url",
+						url: "http://www.tedxverona.com/partners/",
+						title: "Vai al sito"
+					}]
+				}
+			}
+		}
+	};
+	this.callSendAPI(messageData);
+};
+
+Sender.prototype.sendSeeAllTeam = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			attachment: {
+				type: "template",
+				payload: {
+					template_type: "button",
+					text: "Scopri tutto il team!",
+					buttons:[{
+						type: "web_url",
+						url: "http://www.tedxverona.com/team/",
+						title: "Vai al sito"
+					}]
+				}
+			}
+		}
+	};
+	this.callSendAPI(messageData);
+};
+
+
+Sender.prototype.sendSpeakers = function(recipientId)
+{
+	var self = this;
+
+	request({
+		uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=4&per_page=10',
+		method: 'GET'
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var body = shuffle(JSON.parse(body));
+
+			var elements = [];
+			var messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					attachment: {
+						type: "template",
+						payload: {
+							template_type: "generic",
+							elements: []
+						}
+					}
+				}
+			};
+
+			let i = 0;
+			for (; i < body.length; i++ ) {
+				var speaker = body[i];
+
+				elements.push({
+					title: speaker['title']['rendered'],
+					item_url: "http://www.tedxverona.com/speakers/",
+					image_url: speaker['acf']['speaker_thumbnail'],
+					buttons: [{
+						type: "postback",
+						title: "Scopri di più",
+						payload: "show_speaker_detail_" + speaker['id']                     
+					}]
+				});	
+			}
+			messageData['message']['attachment']['payload']['elements'] = elements;
+			self.callSendAPI(messageData , 'show_all_speakers');
+
+		} else {
+			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
+		}
+	});
+	
+};
+
+Sender.prototype.sendPartners = function(recipientId)
+{
+	var self = this;
+
+	request({
+		uri: 'http://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=14,13&per_page=10',
+		method: 'GET'
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var body = shuffle(JSON.parse(body));
+
+			var elements = [];
+			var messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					attachment: {
+						type: "template",
+						payload: {
+							template_type: "generic",
+							elements: []
+						}
+					}
+				}
+			};
+
+			let i = 0;
+			for (; i < body.length; i++ ) {
+				var partner = body[i];
+
+				elements.push({
+					title: partner['title']['rendered'],
+					item_url: partner['acf']['partner_url'],
+					image_url: partner['better_featured_image']['source_url']
+				});	
+			}
+			messageData['message']['attachment']['payload']['elements'] = elements;
+			self.callSendAPI(messageData , 'show_all_partners');
+
+		} else {
+			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
+		}
+	});	
+};
+
+
+Sender.prototype.sendTeam = function(recipientId)
+{
+	var self = this;
+
+	request({
+		uri: 'http://www.tedxverona.com/wp-json/wp/v2/team?team_year=7&per_page=10',
+		method: 'GET'
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var body = shuffle(JSON.parse(body));
+
+			var elements = [];
+			var messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					attachment: {
+						type: "template",
+						payload: {
+							template_type: "generic",
+							elements: []
+						}
+					}
+				}
+			};
+
+			let i = 0;
+			for (; i < body.length; i++ ) {
+				var team = body[i];
+
+				elements.push({
+					title: team['title']['rendered'],
+					item_url: 'http://www.tedxverona.com/team/',
+					image_url: team['better_featured_image']['source_url']
+				});	
+			}
+			messageData['message']['attachment']['payload']['elements'] = elements;
+			self.callSendAPI(messageData , 'show_all_team');
+
+		} else {
+			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
+		}
+	});	
+};
 
 module.exports = Sender;
 

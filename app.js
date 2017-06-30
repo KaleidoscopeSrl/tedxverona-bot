@@ -56,7 +56,6 @@ app.post('/webhook', function (req, res) {
 			var timeOfEvent = pageEntry.time;
 
 			pageEntry.messaging.forEach(function(messagingEvent) {
-				console.log(messagingEvent);
 				if (messagingEvent.optin) {
 					receiver.receivedAuthentication(messagingEvent);
 				} else if (messagingEvent.message) {

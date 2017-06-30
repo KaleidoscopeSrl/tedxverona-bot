@@ -26,40 +26,17 @@ Receiver.prototype.receivedPostback = function(event)
 	if ( payload == 'getStarted' ) {
 		console.log(this.sender);
 		this.sender.sendInitialMenu(senderID);
+	} else if ( payload == 'show_time_to_rock_theme' ) {
+		this.sender.sendTimeToRockTheme(senderID);
+	} else if ( payload == 'show_2017_speakers' ) {
+		this.sender.sendSpeakers(senderID);
+	} else if ( payload == 'show_2017_partners' ) {
+		this.sender.sendPartners(senderID);
+	} else if ( payload == 'show_2017_team' ) {
+		this.sender.sendTeam(senderID);
 	} else {
-		this.sender.sendTextMessage(senderID, "Postback called");
+		this.sender.sendTextMessage(senderID, payload);
 	}
-};
-
-Receiver.prototype.receivedMessageRead = function(event)
-{
-	var senderID = event.sender.id;
-	var recipientID = event.recipient.id;
-
-	// All messages before watermark (a timestamp) or sequence have been seen.
-	var watermark = event.read.watermark;
-	var sequenceNumber = event.read.seq;
-
-	console.log("Received message read event for watermark %d and sequence " +
-		"number %d", watermark, sequenceNumber);
-};
-
-Receiver.prototype.receivedDeliveryConfirmation = function(event)
-{
-	var senderID = event.sender.id;
-	var recipientID = event.recipient.id;
-	var delivery = event.delivery;
-	var messageIDs = delivery.mids;
-	var watermark = delivery.watermark;
-	var sequenceNumber = delivery.seq;
-
-	if (messageIDs) {
-		messageIDs.forEach(function(messageID) {
-			console.log("Received delivery confirmation for message ID: %s", messageID);
-		});
-	}
-
-	console.log("All message before %d were delivered.", watermark);
 };
 
 /*
@@ -91,7 +68,7 @@ Receiver.prototype.receivedMessage = function(event) {
 	var metadata = message.metadata;
 
 	// You may get a text or attachment but not both
-	var messageText = message.text;
+	var messageText = message.text.toLowerCase();
 	var messageAttachments = message.attachments;
 	var quickReply = message.quick_reply;
 
@@ -106,22 +83,38 @@ Receiver.prototype.receivedMessage = function(event) {
 		return;
 	}
 
-	if (messageText) {
+	if ( messageText ) {
+
+		if ( messageText.indexOf('inizi') != -1 || messageText.indexOf('menu') != -1 || messageText.indexOf('start') != -1 ) {
+			this.sender.sendInitialMenu(senderID);
+		}
+
+		if ( messageText.indexOf('speaker') != -1 || messageText.indexOf('relator') != -1 ) {
+			this.sender.sendSpeakers(senderID);
+		}
+
+		if ( messageText.indexOf('partner') != -1 || messageText.indexOf('sponsor') != -1 ) {
+			this.sender.sendPartners(senderID);
+		}
+
+		if ( messageText.indexOf('team') != -1 || messageText.indexOf('organizzatori') != -1 ) {
+			this.sender.sendTeam(senderID);
+		}
 
 		// If we receive a text message, check to see if it matches any special
 		// keywords and send back the corresponding example. Otherwise, just echo
 		// the text we received.
 		switch (messageText) {
 			case 'image':
-				sendImageMessage(senderID);
+				this.sender.sendImageMessage(senderID);
 			break;
 
 			case 'gif':
-				sendGifMessage(senderID);
+				this.sender.sendGifMessage(senderID);
 			break;
 
 			case 'audio':
-				sendAudioMessage(senderID);
+				this.sender.sendAudioMessage(senderID);
 			break;
 
 			case 'video':
@@ -163,14 +156,44 @@ Receiver.prototype.receivedMessage = function(event) {
 			case 'account linking':
 				sendAccountLinking(senderID);
 			break;
-
-			default:
-				sendTextMessage(senderID, messageText);
 		}
 	} else if (messageAttachments) {
 		sendTextMessage(senderID, "Message with attachment received");
 	}
 }
+
+Receiver.prototype.receivedMessageRead = function(event)
+{
+	var senderID = event.sender.id;
+	var recipientID = event.recipient.id;
+
+	// All messages before watermark (a timestamp) or sequence have been seen.
+	var watermark = event.read.watermark;
+	var sequenceNumber = event.read.seq;
+
+	console.log("Received message read event for watermark %d and sequence " +
+		"number %d", watermark, sequenceNumber);
+};
+
+Receiver.prototype.receivedDeliveryConfirmation = function(event)
+{
+	var senderID = event.sender.id;
+	var recipientID = event.recipient.id;
+	var delivery = event.delivery;
+	var messageIDs = delivery.mids;
+	var watermark = delivery.watermark;
+	var sequenceNumber = delivery.seq;
+
+	if (messageIDs) {
+		messageIDs.forEach(function(messageID) {
+			console.log("Received delivery confirmation for message ID: %s", messageID);
+		});
+	}
+
+	console.log("All message before %d were delivered.", watermark);
+};
+
+
 
 Receiver.prototype.receivedAuthentication = function(event) {
 	var senderID = event.sender.id;
