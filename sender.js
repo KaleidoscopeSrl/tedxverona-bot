@@ -29,7 +29,7 @@ function shuffle(array) {
  * get the message id in a response 
  *
  */
-Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess = '')
+Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 {
 	var self = this;
 
@@ -46,13 +46,13 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess = '')
 			if (messageId) {
 				console.log("Successfully sent message with id %s to recipient %s", messageId, recipientId);
 			
-				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_speakers' ) {
+				if ( sendCallOnSuccess && sendCallOnSuccess == 'show_all_speakers' ) {
 					self.sendSeeAllSpeakers( recipientId );
 				}
-				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_partners' ) {
+				if ( sendCallOnSuccess && sendCallOnSuccess == 'show_all_partners' ) {
 					self.sendSeeAllPartners( recipientId );
 				}
-				if ( sendCallOnSuccess != '' && sendCallOnSuccess == 'show_all_team' ) {
+				if ( sendCallOnSuccess && sendCallOnSuccess == 'show_all_team' ) {
 					self.sendSeeAllTeam( recipientId );
 				}
 
@@ -98,7 +98,6 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					elements: [{
 						title: "Time to rock!",
 						item_url: "http://www.tedxverona.com/time-to-rock",
-						//image_url: this.server_url + "/assets/timetorock.jpg",
 						image_url: 'https://www.kaleidoscope.it/assets/img/timetorock.jpg',
 						buttons: [{
 							type: "postback",
@@ -108,7 +107,6 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					}, {
 						title: "Biglietti",
 						item_url: "https://www.eventbrite.it/e/biglietti-tedxverona-2017-78-ottobre-time-to-rock-34884173502#tickets",               
-						//image_url: this.server_url + "/assets/tickets.jpg",
 						image_url: 'https://www.kaleidoscope.it/assets/img/tickets.jpg',
 						buttons: [{
 							type: "web_url",
@@ -118,7 +116,6 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					}, {
 						title: "Speakers",
 						item_url: "http://www.tedxverona.com/speakers",
-						//image_url: this.server_url + "/assets/speakers.jpg",
 						image_url: 'https://www.kaleidoscope.it/assets/img/speakers.jpg',
 						buttons: [{
 							type: "postback",
@@ -128,7 +125,6 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					}, {
 						title: "Partners",
 						item_url: "http://www.tedxverona.com/partners/",
-						//image_url: this.server_url + "/assets/partners.jpg",
 						image_url: 'https://www.kaleidoscope.it/assets/img/partners.jpg',
 						buttons: [{
 							type: "postback",
@@ -138,7 +134,6 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					}, {
 						title: "Team",
 						item_url: "http://www.tedxverona.com/team/",
-						//image_url: this.server_url + "/assets/team.jpg",
 						image_url: 'https://www.kaleidoscope.it/assets/img/team.jpg',
 						buttons: [{
 							type: "postback",
