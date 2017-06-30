@@ -262,7 +262,7 @@ Sender.prototype.sendSpeakers = function(recipientId)
 				}
 			};
 
-			let i = 0;
+			var i = 0;
 			for (; i < body.length; i++ ) {
 				var speaker = body[i];
 
@@ -314,7 +314,7 @@ Sender.prototype.sendPartners = function(recipientId)
 				}
 			};
 
-			let i = 0;
+			var i = 0;
 			for (; i < body.length; i++ ) {
 				var partner = body[i];
 
@@ -361,7 +361,7 @@ Sender.prototype.sendTeam = function(recipientId)
 				}
 			};
 
-			let i = 0;
+			var i = 0;
 			for (; i < body.length; i++ ) {
 				var team = body[i];
 
