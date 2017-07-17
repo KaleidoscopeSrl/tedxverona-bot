@@ -240,7 +240,8 @@ Sender.prototype.sendSpeakers = function(recipientId)
 	var self = this;
 
 	request({
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
+		url: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?include=1351,1364',
+		//uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
