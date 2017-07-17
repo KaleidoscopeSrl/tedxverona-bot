@@ -240,7 +240,7 @@ Sender.prototype.sendSpeakers = function(recipientId)
 	var self = this;
 
 	request({
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=4&per_page=10',
+		uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -292,7 +292,7 @@ Sender.prototype.sendPartners = function(recipientId)
 	var self = this;
 
 	request({
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=14,13&per_page=10',
+		uri: 'http://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=30,14&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
