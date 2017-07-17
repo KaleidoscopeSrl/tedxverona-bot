@@ -97,7 +97,7 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 					template_type: "generic",
 					elements: [{
 						title: "Time to rock!",
-						item_url: "http://www.tedxverona.com/time-to-rock",
+						item_url: "https://www.tedxverona.com/time-to-rock",
 						image_url: 'https://www.kaleidoscope.it/assets/img/timetorock.jpg',
 						buttons: [{
 							type: "postback",
@@ -115,7 +115,7 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 						}]
 					}, {
 						title: "Speakers",
-						item_url: "http://www.tedxverona.com/speakers",
+						item_url: "https://www.tedxverona.com/speakers",
 						image_url: 'https://www.kaleidoscope.it/assets/img/speakers.jpg',
 						buttons: [{
 							type: "postback",
@@ -124,7 +124,7 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 						}]
 					}, {
 						title: "Partners",
-						item_url: "http://www.tedxverona.com/partners/",
+						item_url: "https://www.tedxverona.com/partners/",
 						image_url: 'https://www.kaleidoscope.it/assets/img/partners.jpg',
 						buttons: [{
 							type: "postback",
@@ -133,7 +133,7 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 						}]
 					}, {
 						title: "Team",
-						item_url: "http://www.tedxverona.com/team/",
+						item_url: "https://www.tedxverona.com/team/",
 						image_url: 'https://www.kaleidoscope.it/assets/img/team.jpg',
 						buttons: [{
 							type: "postback",
@@ -178,7 +178,7 @@ Sender.prototype.sendSeeAllSpeakers = function(recipientId) {
 					text: "Scopri tutti gli speakers!",
 					buttons:[{
 						type: "web_url",
-						url: "http://www.tedxverona.com/speakers/",
+						url: "https://www.tedxverona.com/speakers/",
 						title: "Vai al sito"
 					}]
 				}
@@ -201,7 +201,7 @@ Sender.prototype.sendSeeAllPartners = function(recipientId) {
 					text: "Scopri tutti i partners!",
 					buttons:[{
 						type: "web_url",
-						url: "http://www.tedxverona.com/partners/",
+						url: "https://www.tedxverona.com/partners/",
 						title: "Vai al sito"
 					}]
 				}
@@ -224,7 +224,7 @@ Sender.prototype.sendSeeAllTeam = function(recipientId) {
 					text: "Scopri tutto il team!",
 					buttons:[{
 						type: "web_url",
-						url: "http://www.tedxverona.com/team/",
+						url: "https://www.tedxverona.com/team/",
 						title: "Vai al sito"
 					}]
 				}
@@ -240,8 +240,8 @@ Sender.prototype.sendSpeakers = function(recipientId)
 	var self = this;
 
 	request({
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?include=1351,1364',
-		//uri: 'http://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
+		uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker?include=1351,1364',
+		//uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -269,7 +269,7 @@ Sender.prototype.sendSpeakers = function(recipientId)
 
 				elements.push({
 					title: speaker['title']['rendered'],
-					item_url: "http://www.tedxverona.com/speakers/",
+					item_url: "https://www.tedxverona.com/speakers/",
 					image_url: speaker['acf']['speaker_thumbnail'],
 					buttons: [{
 						type: "postback",
@@ -293,7 +293,7 @@ Sender.prototype.sendPartners = function(recipientId)
 	var self = this;
 
 	request({
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=30,14&per_page=10',
+		uri: 'https://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=30,14&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -340,8 +340,8 @@ Sender.prototype.sendTeam = function(recipientId)
 	var self = this;
 
 	request({
-		//uri: 'http://www.tedxverona.com/wp-json/wp/v2/team?team_year=7&per_page=10',
-		uri: 'http://www.tedxverona.com/wp-json/wp/v2/team?include=909,378,373,367,363,359,350,344,341,337,334,325,322,319',
+		//uri: 'https://www.tedxverona.com/wp-json/wp/v2/team?team_year=7&per_page=10',
+		uri: 'https://www.tedxverona.com/wp-json/wp/v2/team?include=909,378,373,367,363,359,350,344,341,337,334,325,322,319',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -369,7 +369,7 @@ Sender.prototype.sendTeam = function(recipientId)
 
 				elements.push({
 					title: team['title']['rendered'],
-					item_url: 'http://www.tedxverona.com/team/',
+					item_url: 'https://www.tedxverona.com/team/',
 					image_url: team['better_featured_image']['source_url']
 				});	
 			}
