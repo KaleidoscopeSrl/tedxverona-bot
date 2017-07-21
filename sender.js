@@ -314,7 +314,7 @@ Sender.prototype.sendSpeakerDetails = function(recipientId, speakerId)
 
 			var speakerBio = body['acf']['speaker_bio'];
 			speakerBio = speakerBio.replace('<p>', '').replace('</p>', '');
-			this.sendTextMessage(recipientId, speakerBio);
+			self.sendTextMessage(recipientId, speakerBio);
 
 		} else {
 			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
