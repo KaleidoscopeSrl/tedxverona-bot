@@ -241,7 +241,6 @@ Sender.prototype.sendSpeakers = function(recipientId)
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker?include=1351,1364',
-		//uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker?speaker_year=32&per_page=10',
 		method: 'GET'
 	}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -285,7 +284,42 @@ Sender.prototype.sendSpeakers = function(recipientId)
 			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
 		}
 	});
-	
+};
+
+Sender.prototype.sendSpeakerDetails = function(recipientId, speakerId)
+{
+	var self = this;
+
+	request({
+		uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker/' + speakerId,
+		method: 'GET'
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var body = JSON.parse(body);
+
+			var messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					attachment: {
+						type: "image",
+						payload: {
+							url: body['acf']['speaker_thumbnail']
+						}
+					}
+				}
+			};
+			self.callSendAPI(messageData);
+
+			var speakerBio = body['acf']['speaker_bio'];
+			speakerBio = speakerBio.replace('<p>', '').replace('</p>', '');
+			this.sendTextMessage(recipientId, speakerBio);
+
+		} else {
+			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
+		}
+	});
 };
 
 Sender.prototype.sendPartners = function(recipientId)
@@ -340,7 +374,6 @@ Sender.prototype.sendTeam = function(recipientId)
 	var self = this;
 
 	request({
-		//uri: 'https://www.tedxverona.com/wp-json/wp/v2/team?team_year=7&per_page=10',
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/team?include=909,378,373,367,363,359,350,344,341,337,334,325,322,319',
 		method: 'GET'
 	}, function (error, response, body) {
