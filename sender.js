@@ -35,7 +35,7 @@ Sender.prototype.showIndicator = function(recipientId) {
 	this.callSendAPI(messageData);
 };
 
-Sender.prototype.hideIndicator = function() {
+Sender.prototype.hideIndicator = function(recipientId) {
 	var messageData = {
 		recipient: {
 			id: recipientId
@@ -80,7 +80,7 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 					self.sendSeeAllWorkshop( recipientId );
 				}
 
-				self.hideIndicator();
+				self.hideIndicator(recipientId);
 
 			} else {
 				console.log("Successfully called Send API for recipient %s", recipientId);
