@@ -36,7 +36,7 @@ Receiver.prototype.receivedPostback = function(event)
 		this.sender.sendTeam(senderID);
 	} else if ( payload.indexOf('show_speaker_detail_') != -1 ) {
 		var speakerId = payload.replace('show_speaker_detail_', '');
-		this.sender.sendSpeakerDetail(senderID, speakerId);	
+		this.sender.sendSpeakerDetails(senderID, speakerId);	
 	} else {
 		this.sender.sendTextMessage(senderID, payload);
 	}
