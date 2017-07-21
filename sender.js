@@ -24,6 +24,27 @@ function shuffle(array) {
   return array;
 }
 
+
+Sender.prototype.showIndicator = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		sender_action: "typing_on"
+	};
+	this.callSendAPI(messageData);
+};
+
+Sender.prototype.hideIndicator = function() {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		sender_action: "typing_off"
+	};
+	this.callSendAPI(messageData);
+};
+
 /*
  * Call the Send API. The message data goes in the body. If successful, we'll 
  * get the message id in a response 
@@ -32,8 +53,6 @@ function shuffle(array) {
 Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 {
 	var self = this;
-
-	this.showIndicator();
 
 	request({
 		uri: 'https://graph.facebook.com/v2.6/me/messages',
@@ -73,25 +92,6 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 
 };
 
-Sender.prototype.showIndicator = function(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		sender_action: "typing_on"
-	};
-	this.callSendAPI(messageData);
-};
-
-Sender.prototype.hideIndicator = function() {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		sender_action: "typing_off"
-	};
-	this.callSendAPI(messageData);
-};
 
 Sender.prototype.sendTextMessage = function(recipientId, messageText)
 {
@@ -105,6 +105,7 @@ Sender.prototype.sendTextMessage = function(recipientId, messageText)
 		}
 	};
 
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
@@ -173,6 +174,7 @@ Sender.prototype.sendInitialMenu = function(recipientId)
 		}
 	};
 
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
@@ -212,6 +214,7 @@ Sender.prototype.sendSeeAllSpeakers = function(recipientId) {
 			}
 		}
 	};
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
@@ -235,6 +238,7 @@ Sender.prototype.sendSeeAllPartners = function(recipientId) {
 			}
 		}
 	};
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
@@ -258,6 +262,7 @@ Sender.prototype.sendSeeAllTeam = function(recipientId) {
 			}
 		}
 	};
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
@@ -281,12 +286,14 @@ Sender.prototype.sendSeeAllWorkshop = function(recipientId) {
 			}
 		}
 	};
+	this.showIndicator();
 	this.callSendAPI(messageData);
 };
 
 Sender.prototype.sendSpeakers = function(recipientId)
 {
 	var self = this;
+	this.showIndicator();
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker?include=1351,1364',
@@ -338,6 +345,7 @@ Sender.prototype.sendSpeakers = function(recipientId)
 Sender.prototype.sendSpeakerDetails = function(recipientId, speakerId)
 {
 	var self = this;
+	this.showIndicator();
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/speaker/' + speakerId,
@@ -374,6 +382,7 @@ Sender.prototype.sendSpeakerDetails = function(recipientId, speakerId)
 Sender.prototype.sendPartners = function(recipientId)
 {
 	var self = this;
+	this.showIndicator();
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/partners?partners_year=28&partners_type=30,14&per_page=10',
@@ -421,6 +430,7 @@ Sender.prototype.sendPartners = function(recipientId)
 Sender.prototype.sendTeam = function(recipientId)
 {
 	var self = this;
+	this.showIndicator();
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/team?include=909,378,373,367,363,359,350,344,341,337,334,325,322,319',
@@ -467,6 +477,7 @@ Sender.prototype.sendTeam = function(recipientId)
 Sender.prototype.sendWorkshop = function(recipientId)
 {
 	var self = this;
+	this.showIndicator();
 
 	request({
 		uri: 'https://www.tedxverona.com/wp-json/wp/v2/workshop?per_page=10',
