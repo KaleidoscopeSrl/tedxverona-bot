@@ -33,6 +33,8 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 {
 	var self = this;
 
+	this.showIndicator();
+
 	request({
 		uri: 'https://graph.facebook.com/v2.6/me/messages',
 		qs: { access_token: this.page_access_token },
@@ -55,6 +57,11 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 				if ( sendCallOnSuccess && sendCallOnSuccess == 'show_all_team' ) {
 					self.sendSeeAllTeam( recipientId );
 				}
+				if ( sendCallOnSuccess && sendCallOnSuccess == 'show_all_workshop' ) {
+					self.sendSeeAllWorkshop( recipientId );
+				}
+
+				self.hideIndicator();
 
 			} else {
 				console.log("Successfully called Send API for recipient %s", recipientId);
@@ -64,6 +71,26 @@ Sender.prototype.callSendAPI = function(messageData, sendCallOnSuccess)
 		}
 	});
 
+};
+
+Sender.prototype.showIndicator = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		sender_action: "typing_on"
+	};
+	this.callSendAPI(messageData);
+};
+
+Sender.prototype.hideIndicator = function() {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		sender_action: "typing_off"
+	};
+	this.callSendAPI(messageData);
 };
 
 Sender.prototype.sendTextMessage = function(recipientId, messageText)
@@ -234,6 +261,28 @@ Sender.prototype.sendSeeAllTeam = function(recipientId) {
 	this.callSendAPI(messageData);
 };
 
+Sender.prototype.sendSeeAllWorkshop = function(recipientId) {
+	var messageData = {
+		recipient: {
+			id: recipientId
+		},
+		message: {
+			attachment: {
+				type: "template",
+				payload: {
+					template_type: "button",
+					text: "Scopri tutti i workshop!",
+					buttons:[{
+						type: "web_url",
+						url: "https://www.tedxverona.com/workshop/",
+						title: "Vai al sito"
+					}]
+				}
+			}
+		}
+	};
+	this.callSendAPI(messageData);
+};
 
 Sender.prototype.sendSpeakers = function(recipientId)
 {
@@ -415,162 +464,57 @@ Sender.prototype.sendTeam = function(recipientId)
 	});	
 };
 
+Sender.prototype.sendWorkshop = function(recipientId)
+{
+	var self = this;
+
+	request({
+		uri: 'https://www.tedxverona.com/wp-json/wp/v2/workshop?per_page=10',
+		method: 'GET'
+	}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			var body = shuffle(JSON.parse(body));
+
+			var elements = [];
+			var messageData = {
+				recipient: {
+					id: recipientId
+				},
+				message: {
+					attachment: {
+						type: "template",
+						payload: {
+							template_type: "generic",
+							elements: []
+						}
+					}
+				}
+			};
+
+			var i = 0;
+			for (; i < body.length; i++ ) {
+				var workshop = body[i];
+
+				elements.push({
+					title: workshop['title']['rendered'],
+					item_url: 'https://www.tedxverona.com/workshop/',
+					image_url: workshop['better_featured_image']['source_url']
+				});	
+			}
+			messageData['message']['attachment']['payload']['elements'] = elements;
+			self.callSendAPI(messageData , 'show_all_workshop');
+
+		} else {
+			console.error("Failed calling WP API", response.statusCode, response.statusMessage, body.error);
+		}
+	});	
+};
+
+
 module.exports = Sender;
 
 
 /*
-
-// Send an image using the Send API.
-function sendImageMessage(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "image",
-				payload: {
-					url: SERVER_URL + "/assets/rift.png"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-
-// Send a video using the Send API.
-function sendVideoMessage(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "video",
-				payload: {
-					url: SERVER_URL + "/assets/allofus480.mov"
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-
-// Send a button message using the Send API.
-function sendButtonMessage(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "button",
-					text: "This is test text",
-					buttons:[{
-						type: "web_url",
-						url: "https://www.oculus.com/en-us/rift/",
-						title: "Open Web URL"
-					}, {
-						type: "postback",
-						title: "Trigger Postback",
-						payload: "DEVELOPER_DEFINED_PAYLOAD"
-					}, {
-						type: "phone_number",
-						title: "Call Phone Number",
-						payload: "+16505551234"
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-// Send a Structured Message (Generic Message type) using the Send API.
-function sendGenericMessage(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			attachment: {
-				type: "template",
-				payload: {
-					template_type: "generic",
-					elements: [{
-						title: "rift",
-						subtitle: "Next-generation virtual reality",
-						item_url: "https://www.oculus.com/en-us/rift/",               
-						image_url: SERVER_URL + "/assets/rift.png",
-						buttons: [{
-							type: "web_url",
-							url: "https://www.oculus.com/en-us/rift/",
-							title: "Open Web URL"
-						}, {
-							type: "postback",
-							title: "Call Postback",
-							payload: "Payload for first bubble",
-						}],
-					}, {
-						title: "touch",
-						subtitle: "Your Hands, Now in VR",
-						item_url: "https://www.oculus.com/en-us/touch/",               
-						image_url: SERVER_URL + "/assets/touch.png",
-						buttons: [{
-							type: "web_url",
-							url: "https://www.oculus.com/en-us/touch/",
-							title: "Open Web URL"
-						}, {
-							type: "postback",
-							title: "Call Postback",
-							payload: "Payload for second bubble",
-						}]
-					}]
-				}
-			}
-		}
-	};
-
-	callSendAPI(messageData);
-}
-
-// Send a message with Quick Reply buttons.
-function sendQuickReply(recipientId) {
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		message: {
-			text: "What's your favorite movie genre?",
-			quick_replies: [
-				{
-					"content_type":"text",
-					"title":"Action",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"
-				},
-				{
-					"content_type":"text",
-					"title":"Comedy",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"
-				},
-				{
-					"content_type":"text",
-					"title":"Drama",
-					"payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"
-				}
-			]
-		}
-	};
-
-	callSendAPI(messageData);
-}
 
 // Send a read receipt to indicate the message has been read
 function sendReadReceipt(recipientId) {
@@ -581,34 +525,6 @@ function sendReadReceipt(recipientId) {
 			id: recipientId
 		},
 		sender_action: "mark_seen"
-	};
-
-	callSendAPI(messageData);
-}
-
-// Turn typing indicator on
-function sendTypingOn(recipientId) {
-	console.log("Turning typing indicator on");
-
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		sender_action: "typing_on"
-	};
-
-	callSendAPI(messageData);
-}
-
-// Turn typing indicator off
-function sendTypingOff(recipientId) {
-	console.log("Turning typing indicator off");
-
-	var messageData = {
-		recipient: {
-			id: recipientId
-		},
-		sender_action: "typing_off"
 	};
 
 	callSendAPI(messageData);

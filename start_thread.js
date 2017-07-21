@@ -43,6 +43,10 @@ function setupMenu()
 					title: 'Time to Rock!',
 					type: 'postback',
 					payload: 'show_time_to_rock_theme'
+				},, {
+					title: 'Workshop',
+					type: 'postback',
+					payload: 'show_2017_workshop'
 				}, {
 					title: 'Speakers',
 					type: 'postback',
