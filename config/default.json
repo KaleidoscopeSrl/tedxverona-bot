@@ -1,0 +1,6 @@
+{
+    "appSecret": "app_secret",
+    "pageAccessToken": "page_access_token",
+    "validationToken": "verification_token",
+    "serverURL": "https://[tedxwhatever].herokuapp.com/"
+}
